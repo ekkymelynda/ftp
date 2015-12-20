@@ -23,5 +23,5 @@ Ketentuannya adalah mengimplementasikan RFC 959 (dituliskan dengan subbab) sebag
 - Mencetak direktori aktif (PWD: 4.1.3) *Tities
 - Mendaftar file dan direktori (LIST: 4.1.3) *Ekky
 - HELP: 4.1.3 *Ekky
-- Reply codes (200, 500, 202, 230, 530: 4.2.1)
+- Reply codes (200, 500, 202, 230, 530: 4.2.1) *Perfungsi
 - Menerapkan teknik multiclient dengan modul select DAN thread *Risma
