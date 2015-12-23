@@ -115,6 +115,15 @@ class ftpserverfunc(threading.Thread):
 	def QUIT(self,cmd):
 		self.client.send('221 Goodbye my friend.... :"\r\n')
 
+	#Mengganti nama file (RNTO: 4.1.3)
+	def RNTO(self,cmd):
+	        fn=os.path.join(self.cwd,cmd[5:-2])
+	        os.rename(self.rnfn,fn)
+	        self.conn.send('250 File renamed.\r\n')
+	def RNFR(self,cmd):
+        	self.rnfn=os.path.join(self.cwd,cmd[5:-2])
+        	self.conn.send('350 Ready.\r\n')
+
 if __name__=='__main__':
 	ftp = ftpserver()
 	ftp.daemon = True
