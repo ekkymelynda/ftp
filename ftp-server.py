@@ -123,6 +123,26 @@ class ftpserverfunc(threading.Thread):
 	def RNFR(self,cmd):
         	self.rnfn=os.path.join(self.cwd,cmd[5:-2])
         	self.conn.send('350 Ready.\r\n')
+        
+        # Membuat direktori (MKD: 4.1.3)	
+        def MKD(self,cmd):
+	        dn=os.path.join(self.cwd,cmd[4:-2])
+	        os.mkdir(dn)
+	        self.conn.send('257 Directory created.\r\n')
+        
+        # Mendaftar file dan direktori (LIST: 4.1.3)
+        def LIST(self,cmd):
+	        self.conn.send('150 Here comes the directory listing.\r\n')
+	        print 'list:', self.cwd
+	        self.start_datasock()
+	        for t in os.listdir(self.cwd):
+	            k=self.toListItem(os.path.join(self.cwd,t))
+	            self.datasock.send(k+'\r\n')
+	        self.stop_datasock()
+	        self.conn.send('226 Directory send OK.\r\n')
+	        
+	# HELP: 4.1.3
+	def LIST(self,cmd):
 
 if __name__=='__main__':
 	ftp = ftpserver()
