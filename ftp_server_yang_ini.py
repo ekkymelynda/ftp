@@ -55,10 +55,11 @@ class ftpserverfunc(threading.Thread):
 		self.rest = False
 		self.pasv_mode = False
 		self.size = 1024
+		self.running = True
 
 	def run(self):
-		self.client.send('220 Welcome!\r\n')
-		while True:
+		self.client.send('220 Welcome my friend! :v\r\n')
+		while self.running:
 			cmd = self.client.recv(self.size)
 			if not cmd:
 				break
@@ -69,41 +70,56 @@ class ftpserverfunc(threading.Thread):
 					func(cmd)
 				except Exception,e:
 					print e
-					self.client.send('500 Sorry.\r\n')
+					self.client.send('500 Maaf, sepertinya Anda salah memasukkan sesuatu ._.\r\n')
 
 	
 	def USER(self,cmd):
 		global flag
 		flag = 0
 		if cmd.strip().split()[1]=='tities':
-			self.client.send('331 Please specify the password.\r\n')
+			self.client.send('331 Buktikan kalau Anda memang my friend :D.\r\n')
 		else:
+			self.client.send('331 Buktikan kalau Anda memang my friend :D.\r\n')
 			flag = 1
 	def PASS(self,cmd):
 		if flag == 1:
-			self.client.send('530 Login Incorrect.\r\n')
-			exit()
+			self.client.send('530 Yah... Bukan my friend.... :(\r\n')
+			#exit()
+			self.client.send('Maaf harus menolak Anda.... :"\r\n')
+			self.running = False
+			self.client.close()
 		elif cmd.strip().split()[1]=='namalengkapku':
-			self.client.send('230 Login Successful.\r\n')
+			self.client.send('230 Huwaaaaaaw! Anda memang my friend :D\r\n')
 		else:
-			self.client.send('530 Login Incorrect.\r\n')
-			exit()
+			self.client.send('530 Yah... Bukan my friend....\r\n')
+			#exit()
+			self.client.send('Maaf harus menolak Anda.... :"\r\n')
+			self.running = False
+			self.client.close()
 	def PWD(self,cmd):
-		print "masuk PWD"
 		cwd=os.path.relpath(self.cwd,self.basewd)
 		if cwd=='.':
 			cwd='/'
 		else:
 			cwd='/'+cwd
-			self.client.send('257 \"%s\"\r\n' % cwd)
+		self.client.send('257 \"%s\"\r\n' % cwd)
+	def CWD(self,cmd):
+		chwd=cmd[4:-2]
+		if chwd=='/':
+			self.cwd=self.basewd
+		elif chwd[0]=='/':
+			self.cwd=os.path.join(self.basewd,chwd[1:])
+		else:
+			self.cwd=os.path.join(self.cwd,chwd)
+		self.client.send('250 Sudah diganti my friend ;)\r\n')
 	def QUIT(self,cmd):
-		self.client.send('221 Goodbye.\r\n')
+		self.client.send('221 Goodbye my friend.... :"\r\n')
 
 if __name__=='__main__':
 	ftp = ftpserver()
 	ftp.daemon = True
 	ftp.start()
 	raw_input('Enter to end...\n')
-	ftp.stop() 
+	#ftp.stop() 
 
 		
