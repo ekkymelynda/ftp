@@ -142,7 +142,7 @@ class ftpserverfunc(threading.Thread):
 	        self.conn.send('226 Directory send OK.\r\n')
 	        
 	# HELP: 4.1.3
-	def LIST(self,cmd):
+	def HELP(self,cmd):
 
 if __name__=='__main__':
 	ftp = ftpserver()
