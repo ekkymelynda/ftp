@@ -143,6 +143,8 @@ class ftpserverfunc(threading.Thread):
 	        
 	# HELP: 4.1.3
 	def HELP(self,cmd):
+		self.conn.send('214-The following commands are recognized:\r\nABOR\r\n ADAT\r\nALLO\r\nAPPE\r\nAUTH\r\nCDUP\r\nCLNT\r\nCWD\r\nDELE\r\nEPRT\r\nEPSV\r\nFEAT\r\nHASH\r\nHELP\r\nLIST\r\nMDTM\r\n')
+		
 
 if __name__=='__main__':
 	ftp = ftpserver()
