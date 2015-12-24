@@ -77,7 +77,7 @@ class ftpserverfunc(threading.Thread):
 	def USER(self,cmd):
 		global flag
 		flag = 0
-		if cmd.strip().split()[1]=='tities':
+		if cmd.strip().split()[1]==str(sys.argv[1]):
 			self.client.send('331 Buktikan kalau Anda memang my friend :D.\r\n')
 		else:
 			self.client.send('331 Buktikan kalau Anda memang my friend :D.\r\n')
@@ -89,7 +89,7 @@ class ftpserverfunc(threading.Thread):
 			self.client.send('Maaf harus menolak Anda.... :"\r\n')
 			self.running = False
 			self.client.close()
-		elif cmd.strip().split()[1]=='namalengkapku':
+		elif cmd.strip().split()[1]==str(sys.argv[2]):
 			self.client.send('230 Huwaaaaaaw! Anda memang my friend :D\r\n')
 		else:
 			self.client.send('530 Yah... Bukan my friend....\r\n')
@@ -115,6 +115,8 @@ class ftpserverfunc(threading.Thread):
 		self.client.send('250 Sudah diganti my friend ;)\r\n')
 	def QUIT(self,cmd):
 		self.client.send('221 Goodbye my friend.... :"\r\n')
+		self.running = False
+		self.client.close()
 
 	#Mengganti nama file (RNTO: 4.1.3)
 	def RNTO(self,cmd):
