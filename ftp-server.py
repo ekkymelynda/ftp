@@ -1,3 +1,4 @@
+#Tes git
 import socket
 import select
 import threading
@@ -114,6 +115,37 @@ class ftpserverfunc(threading.Thread):
 		self.client.send('250 Sudah diganti my friend ;)\r\n')
 	def QUIT(self,cmd):
 		self.client.send('221 Goodbye my friend.... :"\r\n')
+
+	#Mengganti nama file (RNTO: 4.1.3)
+	def RNTO(self,cmd):
+	        fn=os.path.join(self.cwd,cmd[5:-2])
+	        os.rename(self.rnfn,fn)
+	        self.conn.send('250 File renamed.\r\n')
+	def RNFR(self,cmd):
+        	self.rnfn=os.path.join(self.cwd,cmd[5:-2])
+        	self.conn.send('350 Ready.\r\n')
+        
+        # Membuat direktori (MKD: 4.1.3)	
+        def MKD(self,cmd):
+	        dn=os.path.join(self.cwd,cmd[4:-2])
+	        os.mkdir(dn)
+	        self.conn.send('257 Directory created.\r\n')
+        
+        # Mendaftar file dan direktori (LIST: 4.1.3)
+        def LIST(self,cmd):
+	        self.conn.send('150 Here comes the directory listing.\r\n')
+	        print 'list:', self.cwd
+	        self.start_datasock()
+	        for t in os.listdir(self.cwd):
+	            k=self.toListItem(os.path.join(self.cwd,t))
+	            self.datasock.send(k+'\r\n')
+	        self.stop_datasock()
+	        self.conn.send('226 Directory send OK.\r\n')
+	        
+	# HELP: 4.1.3
+	def HELP(self,cmd):
+		self.conn.send('214-The following commands are recognized:\r\nABOR\r\n ADAT\r\nALLO\r\nAPPE\r\nAUTH\r\nCDUP\r\nCLNT\r\nCWD\r\nDELE\r\nEPRT\r\nEPSV\r\nFEAT\r\nHASH\r\nHELP\r\nLIST\r\nMDTM\r\n')
+		
 
 if __name__=='__main__':
 	ftp = ftpserver()
