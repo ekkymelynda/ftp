@@ -9,7 +9,6 @@ allow_delete = False
 local_ip = socket.gethostbyname(socket.gethostname())
 currdir = os.path.abspath('.')
 
-
 class ftpserver(threading.Thread):
 	def __init__(self):
 		self.host = '127.0.0.1'
@@ -127,7 +126,7 @@ class ftpserverfunc(threading.Thread):
 	def RNFR(self,cmd):
         self.rnfn=os.path.join(self.cwd,cmd[5:-2])
         self.client.send('350 Ready.\r\n')
-        
+
     #Membuat direktori (MKD: 4.1.3)
     def MKD(self,cmd):
 	    dn=os.path.join(self.cwd,cmd[4:-2])
@@ -157,7 +156,7 @@ class ftpserverfunc(threading.Thread):
 
 	def PORT(self,cmd):
         if self.pasv_mode:
-            self.servsock.close()
+            self.server.close()
             self.pasv_mode = False
         l=cmd[5:].split(',')
         self.dataAddr='.'.join(l[:4])
