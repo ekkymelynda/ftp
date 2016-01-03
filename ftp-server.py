@@ -119,22 +119,22 @@ class ftpserverfunc(threading.Thread):
 
 	#Mengganti nama file (RNTO: 4.1.3)
 	def RNTO(self,cmd):
-	    fn=os.path.join(self.cwd,cmd[5:-2])
-	    os.rename(self.rnfn,fn)
-	    self.client.send('250 File renamed.\r\n')
+		fn=os.path.join(self.cwd,cmd[5:-2])
+		os.rename(self.rnfn,fn)
+		self.client.send('250 File renamed.\r\n')
 
 	def RNFR(self,cmd):
-        self.rnfn=os.path.join(self.cwd,cmd[5:-2])
-        self.client.send('350 Ready.\r\n')
+		self.rnfn=os.path.join(self.cwd,cmd[5:-2])
+		self.client.send('350 Ready.\r\n')
 
-    #Membuat direktori (MKD: 4.1.3)
-    def MKD(self,cmd):
-	    dn=os.path.join(self.cwd,cmd[4:-2])
-	    os.mkdir(dn)
-	    self.client.send('257 Directory created.\r\n')
-        
-    #Mendaftar file dan direktori (LIST: 4.1.3)
-    def LIST(self,cmd):
+	#Membuat direktori (MKD: 4.1.3)
+	def MKD(self,cmd):
+		dn=os.path.join(self.cwd,cmd[4:-2])
+		os.mkdir(dn)
+		self.client.send('257 Directory created.\r\n')
+
+	#Mendaftar file dan direktori (LIST: 4.1.3)
+	def LIST(self,cmd):
 		self.client.send('150 Here comes the directory listing.\r\n')
 		print 'list:', self.cwd
 		self.start_datasock()
@@ -146,40 +146,78 @@ class ftpserverfunc(threading.Thread):
 
 	def PASV(self,cmd):
 		self.pasv_mode = True
-        self.server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+		self.server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		self.server.bind((local_ip,0))
-        self.server.listen(1)
-        ip, port = self.server.getsockname()
-        print 'open', ip, port
-        self.client.send('227 Entering Passive Mode (%s,%u,%u).\r\n' %
-                (','.join(ip.split('.')), port>>8&0xFF, port&0xFF))
+		self.server.listen(1)
+		ip, port = self.server.getsockname()
+		print 'open', ip, port
+		self.client.send('227 Entering Passive Mode (%s,%u,%u).\r\n' %
+				(','.join(ip.split('.')), port>>8&0xFF, port&0xFF))
 
 	def PORT(self,cmd):
-        if self.pasv_mode:
-            self.server.close()
-            self.pasv_mode = False
-        l=cmd[5:].split(',')
-        self.dataAddr='.'.join(l[:4])
-        self.dataPort=(int(l[4])<<8)+int(l[5])
-        self.conn.send('200 Get port.\r\n')
+		if self.pasv_mode:
+			self.server.close()
+			self.pasv_mode = False
+		l=cmd[5:].split(',')
+		self.dataAddr='.'.join(l[:4])
+		self.dataPort=(int(l[4])<<8)+int(l[5])
+		self.conn.send('200 Get port.\r\n')
 
 	def start_datasock(self):
-        if self.pasv_mode:
-            self.datasock, addr = self.servsock.accept()
-            print 'connect:', addr
-        else:
-            self.datasock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            self.datasock.connect((self.dataAddr,self.dataPort))
+		if self.pasv_mode:
+			self.datasock, addr = self.servsock.accept()
+			print 'connect:', addr
+		else:
+			self.datasock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+			self.datasock.connect((self.dataAddr,self.dataPort))
 
-    def stop_datasock(self):
-        self.datasock.close()
-        if self.pasv_mode:
-            self.servsock.close()
+	def stop_datasock(self):
+		self.datasock.close()
+		if self.pasv_mode:
+			self.servsock.close()
 
 	# HELP: 4.1.3
 	def HELP(self,cmd):
 		self.client.send('214-The following commands are recognized:\r\nABOR\r\n ADAT\r\nALLO\r\nAPPE\r\nAUTH\r\nCDUP\r\nCLNT\r\nCWD\r\nDELE\r\nEPRT\r\nEPSV\r\nFEAT\r\nHASH\r\nHELP\r\nLIST\r\nMDTM\r\n')
-		
+
+	# Download file
+
+	def RETR(self,cmd):
+		fn=os.path.join(self.cwd,cmd[5:-2])
+		print 'Downlowding:',fn
+		if self.mode=='I':
+			fi=open(fn,'rb')
+		else:
+			fi=open(fn,'r')
+		self.conn.send('150 Opening data connection.\r\n')
+		if self.rest:
+			fi.seek(self.pos)
+			self.rest=False
+		data= fi.read(1024)
+		self.start_datasock()
+		while data:
+			self.datasock.send(data)
+			data=fi.read(1024)
+		fi.close()
+		self.stop_datasock()
+		self.conn.send('226 Transfer complete.\r\n')
+
+	def STOR(self,cmd):
+		fn=os.path.join(self.cwd,cmd[5:-2])
+		print 'Uplaoding:',fn
+		if self.mode=='I':
+			fo=open(fn,'wb')
+		else:
+			fo=open(fn,'w')
+		self.conn.send('150 Opening data connection.\r\n')
+		self.start_datasock()
+		while True:
+			data=self.datasock.recv(1024)
+			if not data: break
+			fo.write(data)
+		fo.close()
+		self.stop_datasock()
+		self.conn.send('226 Transfer complete.\r\n')
 
 if __name__=='__main__':
 	ftp = ftpserver()
