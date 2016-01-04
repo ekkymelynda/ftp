@@ -36,13 +36,16 @@ try:
 			client1.connect(('127.0.1.1',data_port))
 			data = client1.recv(1024)
 			#sys.stdout.write(data)
-
 			while data:
 				tmp=client1.recv(1024)
 				if tmp=='':
 					break
 				data=data+tmp
 			sys.stdout.write(data)
+
+			client1.close()
+		#if "150" in pesan:
+				
 		sys.stdout.write('>>')
 
 except KeyboardInterrupt:
