@@ -80,6 +80,7 @@ class ftpserverfunc(threading.Thread):
 		else:
 			self.client.send('331 Buktikan kalau Anda memang my friend :D.\r\n')
 			flag = 1
+	
 	def PASS(self,cmd):
 		if flag == 1:
 			self.client.send('530 Yah... Bukan my friend.... :(\r\n')
@@ -94,6 +95,7 @@ class ftpserverfunc(threading.Thread):
 			self.client.send('Maaf harus menolak Anda.... :"\r\n')
 			self.running = False
 			self.client.close()
+	
 	def PWD(self,cmd):
 		cwd=os.path.relpath(self.cwd,self.basewd)
 		if cwd=='.':
@@ -101,6 +103,7 @@ class ftpserverfunc(threading.Thread):
 		else:
 			cwd='/'+cwd
 		self.client.send('257 \"%s\"\r\n' % cwd)
+	
 	def CWD(self,cmd):
 		chwd=cmd[4:-2]
 		if chwd=='/':
@@ -110,6 +113,7 @@ class ftpserverfunc(threading.Thread):
 		else:
 			self.cwd=os.path.join(self.cwd,chwd)
 		self.client.send('250 Sudah diganti my friend ;)\r\n')
+	
 	def QUIT(self,cmd):
 		self.client.send('221 Goodbye my friend.... :"\r\n')
 		self.running = False
@@ -127,7 +131,7 @@ class ftpserverfunc(threading.Thread):
 
 	#Membuat direktori (MKD: 4.1.3)
 	def MKD(self,cmd):
-		dn=os.path.join(self.cwd,cmd[4:-2])
+		dn=os.path.join(self.cwd,cmd[4:-1])
 		os.mkdir(dn)
 		self.client.send('257 Directory created.\r\n')
 
@@ -161,9 +165,9 @@ class ftpserverfunc(threading.Thread):
 		self.servsock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		self.servsock.bind((local_ip,0))
 		self.servsock.listen(1)
-		ip = '127.0.0.1'
-		port = 5000
-		#ip, port = self.server.getsockname()
+		#ip = '127.0.0.1'
+		#port = 5000
+		ip, port = self.servsock.getsockname()
 		print 'open', ip, port
 		self.client.send('227 Entering Passive Mode (%s,%u,%u).\r\n' %
 				(','.join(ip.split('.')), port>>8&0xFF, port&0xFF))
@@ -218,7 +222,7 @@ class ftpserverfunc(threading.Thread):
 
 	def STOR(self,cmd):
 		fn=os.path.join(self.cwd,cmd[5:-2])
-		print 'Uplaoding:',fn
+		print 'Uploading:',fn
 		if self.mode=='I':
 			fo=open(fn,'wb')
 		else:
@@ -234,10 +238,22 @@ class ftpserverfunc(threading.Thread):
 		self.conn.send('226 Transfer complete.\r\n')
 
 	def DELE(self,cmd):
-		rm=os.path.join(self.cwd,cdm[5:-2])
+		rm=os.path.join(self.cwd,cdm[5:-1])
+		allow_delete = True
 		if allow_delete:
 			os.remove(fn)
 			self.client.send('250 File sudah dihapus.\r\n')
+			allow_delete = False
+		else:
+			self.client.send('450 Tidak diperbolehkan menghapus.\r\n')
+
+	def RMD(self,cmd):
+		dn=os.path.join(self.cwd,cmd[4:-1])
+		allow_delete = True
+		if allow_delete:
+			os.rmdir(dn)
+			self.client.send('250 Direktori sudah dihapus.\r\n')
+			allow_delete = False
 		else:
 			self.client.send('450 Tidak diperbolehkan menghapus.\r\n')
 
