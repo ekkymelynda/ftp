@@ -13,6 +13,7 @@ class ftpserver(threading.Thread):
 	def __init__(self):
 		self.host = '127.0.0.1'
 		self.port = 5000
+		self.mode = 'I'
 		self.backlog = 5
 		self.size = 1024
 		self.threads = []
@@ -33,7 +34,7 @@ class ftpserver(threading.Thread):
 
 			for s in inputready:
 				if s == self.server:
-					print s 
+					print s
 					c = ftpserverfunc(self.server.accept())
 					c.start()
 					self.threads.append(c)
@@ -71,7 +72,7 @@ class ftpserverfunc(threading.Thread):
 				except Exception,e:
 					print e
 					self.client.send('500 Maaf, sepertinya Anda salah memasukkan sesuatu ._.\r\n')
-	
+
 	def USER(self,cmd):
 		global flag
 		flag = 0
@@ -80,7 +81,7 @@ class ftpserverfunc(threading.Thread):
 		else:
 			self.client.send('331 Buktikan kalau Anda memang my friend :D.\r\n')
 			flag = 1
-	
+
 	def PASS(self,cmd):
 		if flag == 1:
 			self.client.send('530 Yah... Bukan my friend.... :(\r\n')
@@ -95,15 +96,16 @@ class ftpserverfunc(threading.Thread):
 			self.client.send('Maaf harus menolak Anda.... :"\r\n')
 			self.running = False
 			self.client.close()
-	
+
 	def PWD(self,cmd):
 		cwd=os.path.relpath(self.cwd,self.basewd)
 		if cwd=='.':
 			cwd='/'
 		else:
 			cwd='/'+cwd
+		print cwd
 		self.client.send('257 \"%s\"\r\n' % cwd)
-	
+
 	def CWD(self,cmd):
 		chwd=cmd[4:-2]
 		if chwd=='/':
@@ -113,7 +115,7 @@ class ftpserverfunc(threading.Thread):
 		else:
 			self.cwd=os.path.join(self.cwd,chwd)
 		self.client.send('250 Sudah diganti my friend ;)\r\n')
-	
+
 	def QUIT(self,cmd):
 		self.client.send('221 Goodbye my friend.... :"\r\n')
 		self.running = False
@@ -121,12 +123,12 @@ class ftpserverfunc(threading.Thread):
 
 	#Mengganti nama file (RNTO: 4.1.3)
 	def RNTO(self,cmd):
-		fn=os.path.join(self.cwd,cmd[5:-2])
+		fn=os.path.join(self.cwd,cmd[5:-1])
 		os.rename(self.rnfn,fn)
 		self.client.send('250 File renamed.\r\n')
 
 	def RNFR(self,cmd):
-		self.rnfn=os.path.join(self.cwd,cmd[5:-2])
+		self.rnfn=os.path.join(self.cwd,cmd[5:-1])
 		self.client.send('350 Ready.\r\n')
 
 	#Membuat direktori (MKD: 4.1.3)
@@ -201,7 +203,7 @@ class ftpserverfunc(threading.Thread):
 	# Download file
 
 	def RETR(self,cmd):
-		fn=os.path.join(self.cwd,cmd[5:-2])
+		fn=os.path.join(self.cwd,cmd[5:-1])
 		print 'Downlowding:',fn
 		if self.mode=='I':
 			fi=open(fn,'rb')
@@ -221,13 +223,13 @@ class ftpserverfunc(threading.Thread):
 		self.client.send('226 Transfer complete.\r\n')
 
 	def STOR(self,cmd):
-		fn=os.path.join(self.cwd,cmd[5:-2])
+		fn=os.path.join(self.cwd,cmd[5:-1])
 		print 'Uploading:',fn
 		if self.mode=='I':
 			fo=open(fn,'wb')
 		else:
 			fo=open(fn,'w')
-		self.client.send('150 Opening data connection.\r\n')
+		self.client.send('150 Opening data connection.\r\n226 Transfer complete.\r\n')
 		self.start_datasock()
 		while True:
 			data=self.datasock.recv(1024)
@@ -235,10 +237,10 @@ class ftpserverfunc(threading.Thread):
 			fo.write(data)
 		fo.close()
 		self.stop_datasock()
-		self.conn.send('226 Transfer complete.\r\n')
+		#self.conn.send('226 Transfer complete.\r\n')
 
 	def DELE(self,cmd):
-		rm=os.path.join(self.cwd,cdm[5:-1])
+		fn=os.path.join(self.cwd,cmd[5:-1])
 		allow_delete = True
 		if allow_delete:
 			os.remove(fn)
@@ -262,6 +264,4 @@ if __name__=='__main__':
 	ftp.daemon = True
 	ftp.start()
 	raw_input('Enter to end...\n')
-	#ftp.stop() 
-
-		
+	#ftp.stop()
