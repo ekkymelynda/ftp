@@ -8,6 +8,7 @@ client.connect(server_addr)
 
 sys.stdout.write(client.recv(1024))
 sys.stdout.write('>>')
+data_port = 0
 
 try:
 	while True:
@@ -20,17 +21,28 @@ try:
 			client.close()
 			sys.exit(0)
 			break
-		elif "530" in pesan:
+		if "530" in pesan:
 			#sys.stdout.write(pesan)
 			client.close()
 			sys.exit(0)
 		if "Entering Passive Mode" in pesan:
+			lala=''
 			p1 = int(pesan.split(',')[4])
 			p2 = int(pesan.split(',')[5].split(')')[0])
 			data_port = p1 * 256 + p2
-			client1=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			client1.connect(('127.0.0.1',data_port))
-			sys.stdout.write(client1.recv(1024))
+		if "Here" in pesan:
+			data=''
+			client1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			client1.connect(('127.0.1.1',data_port))
+			data = client1.recv(1024)
+			#sys.stdout.write(data)
+
+			while data:
+				tmp=client1.recv(1024)
+				if tmp=='':
+					break
+				data=data+tmp
+			sys.stdout.write(data)
 		sys.stdout.write('>>')
 
 except KeyboardInterrupt:

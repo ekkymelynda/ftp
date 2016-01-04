@@ -144,7 +144,7 @@ class ftpserverfunc(threading.Thread):
 
 	def TYPE(self,cmd):
 		self.mode=cmd[5]
-		self.conn.send('200 Binary mode.\r\n')
+		self.client.send('200 Binary mode.\r\n')
 
 	def toListItem(self,fn):
 		st=os.stat(fn)
@@ -203,7 +203,7 @@ class ftpserverfunc(threading.Thread):
 			fi=open(fn,'rb')
 		else:
 			fi=open(fn,'r')
-		self.conn.send('150 Opening data connection.\r\n')
+		self.client.send('150 Opening data connection.\r\n')
 		if self.rest:
 			fi.seek(self.pos)
 			self.rest=False
@@ -214,7 +214,7 @@ class ftpserverfunc(threading.Thread):
 			data=fi.read(1024)
 		fi.close()
 		self.stop_datasock()
-		self.conn.send('226 Transfer complete.\r\n')
+		self.client.send('226 Transfer complete.\r\n')
 
 	def STOR(self,cmd):
 		fn=os.path.join(self.cwd,cmd[5:-2])
@@ -223,7 +223,7 @@ class ftpserverfunc(threading.Thread):
 			fo=open(fn,'wb')
 		else:
 			fo=open(fn,'w')
-		self.conn.send('150 Opening data connection.\r\n')
+		self.client.send('150 Opening data connection.\r\n')
 		self.start_datasock()
 		while True:
 			data=self.datasock.recv(1024)
@@ -237,9 +237,9 @@ class ftpserverfunc(threading.Thread):
 		rm=os.path.join(self.cwd,cdm[5:-2])
 		if allow_delete:
 			os.remove(fn)
-			self.conn.send('250 File sudah dihapus.\r\n')
+			self.client.send('250 File sudah dihapus.\r\n')
 		else:
-			self.conn.send('450 Tidak diperbolehkan menghapus.\r\n')
+			self.client.send('450 Tidak diperbolehkan menghapus.\r\n')
 
 if __name__=='__main__':
 	ftp = ftpserver()
