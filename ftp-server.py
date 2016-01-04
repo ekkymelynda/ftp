@@ -171,7 +171,7 @@ class ftpserverfunc(threading.Thread):
 		l=cmd[5:].split(',')
 		self.dataAddr='.'.join(l[:4])
 		self.dataPort=(int(l[4])<<8)+int(l[5])
-		self.conn.send('200 Get port.\r\n')
+		self.client.send('200 Get port.\r\n')
 
 	def start_datasock(self):
 		if self.pasv_mode:
