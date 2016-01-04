@@ -36,13 +36,13 @@ try:
 			client1.connect(('127.0.1.1',data_port))
 			data = client1.recv(1024)
 			#sys.stdout.write(data)
-
 			while data:
 				tmp=client1.recv(1024)
 				if tmp=='':
 					break
 				data=data+tmp
 			sys.stdout.write(data)
+<<<<<<< HEAD
 		if "150" in pesan:
 			client1 = socket1.socket(socket.AF_INET, socket.SOCK_STREAM)
 			client1 = connect(('127.0.1.1',data_port))
@@ -54,6 +54,12 @@ try:
 					f.write(data)
 			f.close()
 			client1.close()
+=======
+
+			client1.close()
+		#if "150" in pesan:
+				
+>>>>>>> 5a8398ee33f7a2de0ed372a8a9d6b69082a366e2
 		sys.stdout.write('>>')
 
 except KeyboardInterrupt:
