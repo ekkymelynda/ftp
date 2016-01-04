@@ -8,11 +8,15 @@ client.connect(server_addr)
 
 sys.stdout.write(client.recv(1024))
 sys.stdout.write('>>')
-data_port = 0
 
+data_port = 0
+nama_file = ''
 try:
 	while True:
 		msg = sys.stdin.readline()
+		if " " in msg:
+			nama_file = msg.split(' ',1)[1][:-1]
+			print nama_file
 		client.send(msg)
 		pesan = client.recv(1024)
 		sys.stdout.write(pesan)
@@ -30,7 +34,7 @@ try:
 			p1 = int(pesan.split(',')[4])
 			p2 = int(pesan.split(',')[5].split(')')[0])
 			data_port = p1 * 256 + p2
-		if "Here" in pesan:
+		if "LIST" in msg:
 			data=''
 			client1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			client1.connect(('127.0.1.1',data_port))
@@ -42,21 +46,39 @@ try:
 					break
 				data=data+tmp
 			sys.stdout.write(data)
-		if "150" in pesan:
-			client1 = socket1.socket(socket.AF_INET, socket.SOCK_STREAM)
-			client1 = connect(('127.0.1.1',data_port))
-			with open ("alice29.txt", 'wb') as f:
+			pesan = client.recv(1024)
+			print pesan
+			client1.close()
+		if "RETR" in msg:
+			client1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			client1.connect(('127.0.1.1',data_port))
+			with open (nama_file, 'wb') as f:
 				data = ""
 				while True:
 					data = client1.recv(1024)
 					if not data:break
 					f.write(data)
 			f.close()
+			pesan = client.recv(1024)
+			print pesan
 			client1.close()
-
+		if "STOR" in msg:
+			client1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			client1.connect(('127.0.1.1',data_port))
+			with open (nama_file, 'rb') as f:
+				data = ""
+				data = f.read(1024)
+				while data:
+					client1.send(data)
+					data = f.read(1024)
+			f.close()
+			#pesan = client.recv(1024)
+			#print pesan
+			client1.close()
 		sys.stdout.write('>>')
 
 except KeyboardInterrupt:
 	client.close()
-	
+
 	sys.exit(0)
+
