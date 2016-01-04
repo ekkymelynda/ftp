@@ -143,6 +143,7 @@ class ftpserverfunc(threading.Thread):
 		self.client.send('226 Directory send OK.\r\n')
 
 	def toListItem(self,fn):
+<<<<<<< HEAD
 		st=os.stat(fn)
 		fullmode='rwxrwxrwx'
 		mode=''
@@ -151,6 +152,16 @@ class ftpserverfunc(threading.Thread):
 		d=(os.path.isdir(fn)) and 'd' or '-'
 		ftime=time.strftime(' %b %d %H:%M ',time.gmtime(st.st_mtime))
 		return d+mode+' 1 user group '+str(st.st_size)+ftime+os.path.basename(fn)
+=======
+        st=os.stat(fn)
+        fullmode='rwxrwxrwx'
+        mode=''
+        for i in range(9):
+            mode+=((st.st_mode>>(8-i))&1) and fullmode[i] or '-'
+        d=(os.path.isdir(fn)) and 'd' or '-'
+        ftime=time.strftime(' %b %d %H:%M ', time.gmtime(st.st_mtime))
+        return d+mode+' 1 user group '+str(st.st_size)+ftime+os.path.basename(fn)
+>>>>>>> f96c06d2c4b44f0bfc946ad986b7ea5d5941561b
 
 	def PASV(self,cmd):
 		self.pasv_mode = True
