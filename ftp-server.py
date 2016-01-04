@@ -142,6 +142,10 @@ class ftpserverfunc(threading.Thread):
 		self.stop_datasock()
 		self.client.send('226 Directory send OK.\r\n')
 
+	def TYPE(self,cmd):
+		self.mode=cmd[5]
+		self.conn.send('200 Binary mode.\r\n')
+
 	def toListItem(self,fn):
 		st=os.stat(fn)
 		fullmode='rwxrwxrwx'
