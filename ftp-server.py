@@ -71,7 +71,6 @@ class ftpserverfunc(threading.Thread):
 				except Exception,e:
 					print e
 					self.client.send('500 Maaf, sepertinya Anda salah memasukkan sesuatu ._.\r\n')
-
 	
 	def USER(self,cmd):
 		global flag
@@ -84,7 +83,6 @@ class ftpserverfunc(threading.Thread):
 	def PASS(self,cmd):
 		if flag == 1:
 			self.client.send('530 Yah... Bukan my friend.... :(\r\n')
-			#exit()
 			self.client.send('Maaf harus menolak Anda.... :"\r\n')
 			self.running = False
 			self.client.close()
@@ -144,19 +142,31 @@ class ftpserverfunc(threading.Thread):
 		self.stop_datasock()
 		self.client.send('226 Directory send OK.\r\n')
 
+	def toListItem(self,fn):
+		st=os.stat(fn)
+		fullmode='rwxrwxrwx'
+		mode=''
+		for i in range(9):
+			mode+=((st.st_mode>>(8-i))&1) and fullmode[i] or '-'
+		d=(os.path.isdir(fn)) and 'd' or '-'
+		ftime=time.strftime(' %b %d %H:%M ',time.gmtime(st.st_mtime))
+		return d+mode+' 1 user group '+str(st.st_size)+ftime+os.path.basename(fn)
+
 	def PASV(self,cmd):
 		self.pasv_mode = True
-		self.server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-		self.server.bind((local_ip,0))
-		self.server.listen(1)
-		ip, port = self.server.getsockname()
+		self.servsock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+		self.servsock.bind((local_ip,0))
+		self.servsock.listen(1)
+		ip = '127.0.0.1'
+		port = 5000
+		#ip, port = self.server.getsockname()
 		print 'open', ip, port
 		self.client.send('227 Entering Passive Mode (%s,%u,%u).\r\n' %
 				(','.join(ip.split('.')), port>>8&0xFF, port&0xFF))
 
 	def PORT(self,cmd):
 		if self.pasv_mode:
-			self.server.close()
+			self.servsock.close()
 			self.pasv_mode = False
 		l=cmd[5:].split(',')
 		self.dataAddr='.'.join(l[:4])
@@ -178,7 +188,7 @@ class ftpserverfunc(threading.Thread):
 
 	# HELP: 4.1.3
 	def HELP(self,cmd):
-		self.client.send('214-The following commands are recognized:\r\nABOR\r\n ADAT\r\nALLO\r\nAPPE\r\nAUTH\r\nCDUP\r\nCLNT\r\nCWD\r\nDELE\r\nEPRT\r\nEPSV\r\nFEAT\r\nHASH\r\nHELP\r\nLIST\r\nMDTM\r\n')
+		self.client.send('214-The following commands are recognized:\r\nCWD\r\nQUIT\r\nRETR\r\nSTOR\r\nRNTO\r\nDELE\r\nRMD\r\nMKD\r\nPWD\r\nLIST\r\nHELP\r\nPASV\r\n')
 
 	# Download file
 
@@ -218,6 +228,14 @@ class ftpserverfunc(threading.Thread):
 		fo.close()
 		self.stop_datasock()
 		self.conn.send('226 Transfer complete.\r\n')
+
+	def DELE(self,cmd):
+		rm=os.path.join(self.cwd,cdm[5:-2])
+		if allow_delete:
+			os.remove(fn)
+			self.conn.send('250 File sudah dihapus.\r\n')
+		else:
+			self.conn.send('450 Tidak diperbolehkan menghapus.\r\n')
 
 if __name__=='__main__':
 	ftp = ftpserver()

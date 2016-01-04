@@ -24,8 +24,16 @@ try:
 			#sys.stdout.write(pesan)
 			client.close()
 			sys.exit(0)
+		if "Entering Passive Mode" in pesan:
+			p1 = int(pesan.split(',')[4])
+			p2 = int(pesan.split(',')[5].split(')')[0])
+			data_port = p1 * 256 + p2
+			client1=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			client1.connect(('127.0.0.1',data_port))
+			sys.stdout.write(client1.recv(1024))
 		sys.stdout.write('>>')
 
 except KeyboardInterrupt:
 	client.close()
+	
 	sys.exit(0)
