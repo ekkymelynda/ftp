@@ -43,6 +43,17 @@ try:
 					break
 				data=data+tmp
 			sys.stdout.write(data)
+		if "150" in pesan:
+			client1 = socket1.socket(socket.AF_INET, socket.SOCK_STREAM)
+			client1 = connect(('127.0.1.1',data_port))
+			with open ("alice29.txt", 'wb') as f:
+				data = ""
+				while True:
+					data = client1.recv(1024)
+					if not data:break
+					f.write(data)
+			f.close()
+			client1.close()
 		sys.stdout.write('>>')
 
 except KeyboardInterrupt:
