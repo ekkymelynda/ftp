@@ -11,15 +11,32 @@ sys.stdout.write('>>')
 
 data_port = 0
 nama_file = ''
+i = 0
 try:
 	while True:
+		#print i
 		msg = sys.stdin.readline()
 		if " " in msg:
 			nama_file = msg.split(' ',1)[1][:-1]
 			print nama_file
-		client.send(msg)
-		pesan = client.recv(1024)
-		sys.stdout.write(pesan)
+		if i==0:
+			if "USER" not in msg:
+				client.send("USER anonymous")
+				pesan = client.recv(1024)
+				#sys.stdout.write(pesan)
+				if "331" in pesan:
+					client.send("PASS ***")
+					pesan = client.recv(1024)
+					sys.stdout.write(pesan)
+					print "Anda lupa memasukkan USER dan PASS terlebih dahulu"
+			else:
+				client.send(msg)
+				pesan = client.recv(1024)
+				sys.stdout.write(pesan)
+		else:
+			client.send(msg)
+			pesan = client.recv(1024)
+			sys.stdout.write(pesan)
 		if "221" in pesan:
 			#sys.stdout.write(pesan)
 			client.close()
@@ -76,6 +93,7 @@ try:
 			#print pesan
 			client1.close()
 		sys.stdout.write('>>')
+		i+=1
 
 except KeyboardInterrupt:
 	client.close()
