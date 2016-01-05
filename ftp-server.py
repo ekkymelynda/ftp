@@ -59,7 +59,7 @@ class ftpserverfunc(threading.Thread):
 		self.running = True
 
 	def run(self):
-		self.client.send('220 Welcome my friend! :v\r\n')
+		self.client.send('220 Welcome! :v\r\n')
 		while self.running:
 			cmd = self.client.recv(self.size)
 			if not cmd:
@@ -77,23 +77,21 @@ class ftpserverfunc(threading.Thread):
 		global flag
 		flag = 0
 		if cmd.strip().split()[1]==str(sys.argv[1]):
-			self.client.send('331 Buktikan kalau Anda memang my friend :D.\r\n')
+			self.client.send('331 Masukkan password.\r\n')
 		else:
-			self.client.send('331 Buktikan kalau Anda memang my friend :D.\r\n')
+			self.client.send('331 Masukkan password.\r\n')
 			flag = 1
 
 	def PASS(self,cmd):
 		if flag == 1:
-			self.client.send('530 Yah... Bukan my friend.... :(\r\n')
-			self.client.send('Maaf harus menolak Anda.... :"\r\n')
+			self.client.send('530 Login gagal\r\n')
 			self.running = False
 			self.client.close()
 		elif cmd.strip().split()[1]==str(sys.argv[2]):
-			self.client.send('230 Huwaaaaaaw! Anda memang my friend :D\r\n')
+			self.client.send('230 Login sukses\r\n')
 		else:
-			self.client.send('530 Yah... Bukan my friend....\r\n')
+			self.client.send('530 Login gagal\r\n')
 			#exit()
-			self.client.send('Maaf harus menolak Anda.... :"\r\n')
 			self.running = False
 			self.client.close()
 
@@ -114,10 +112,10 @@ class ftpserverfunc(threading.Thread):
 			self.cwd=os.path.join(self.basewd,chwd[1:])
 		else:
 			self.cwd=os.path.join(self.cwd,chwd)
-		self.client.send('250 Sudah diganti my friend ;)\r\n')
+		self.client.send('250 CWD berhasil\r\n')
 
 	def QUIT(self,cmd):
-		self.client.send('221 Goodbye my friend.... :"\r\n')
+		self.client.send('221 Goodbye :"\r\n')
 		self.running = False
 		self.client.close()
 
