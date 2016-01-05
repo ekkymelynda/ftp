@@ -59,7 +59,7 @@ class ftpserverfunc(threading.Thread):
 		self.running = True
 
 	def run(self):
-		self.client.send('220 Welcome! :v\r\n')
+		self.client.send('220 Welcome!\r\n')
 		while self.running:
 			cmd = self.client.recv(self.size)
 			if not cmd:
@@ -71,26 +71,26 @@ class ftpserverfunc(threading.Thread):
 					func(cmd)
 				except Exception,e:
 					print e
-					self.client.send('500 Maaf, sepertinya Anda salah memasukkan sesuatu ._.\r\n')
+					self.client.send('500 Sorry.\r\n')
 
 	def USER(self,cmd):
 		global flag
 		flag = 0
 		if cmd.strip().split()[1]==str(sys.argv[1]):
-			self.client.send('331 Masukkan password.\r\n')
+			self.client.send('331 Please specify the password.\r\n')
 		else:
-			self.client.send('331 Masukkan password.\r\n')
+			self.client.send('331 Please specify the password.\r\n')
 			flag = 1
 
 	def PASS(self,cmd):
 		if flag == 1:
-			self.client.send('530 Login gagal\r\n')
+			self.client.send('530 Login incorrect\r\n')
 			self.running = False
 			self.client.close()
 		elif cmd.strip().split()[1]==str(sys.argv[2]):
-			self.client.send('230 Login sukses\r\n')
+			self.client.send('230 User logged in, proceed.\r\n')
 		else:
-			self.client.send('530 Login gagal\r\n')
+			self.client.send('530 Login incorrect\r\n')
 			#exit()
 			self.running = False
 			self.client.close()
@@ -112,10 +112,10 @@ class ftpserverfunc(threading.Thread):
 			self.cwd=os.path.join(self.basewd,chwd[1:])
 		else:
 			self.cwd=os.path.join(self.cwd,chwd)
-		self.client.send('250 CWD berhasil\r\n')
+		self.client.send('250 Working directory changed.\r\n')
 
 	def QUIT(self,cmd):
-		self.client.send('221 Goodbye :"\r\n')
+		self.client.send('221 Goodbye.\r\n')
 		self.running = False
 		self.client.close()
 
@@ -242,20 +242,20 @@ class ftpserverfunc(threading.Thread):
 		allow_delete = True
 		if allow_delete:
 			os.remove(fn)
-			self.client.send('250 File sudah dihapus.\r\n')
+			self.client.send('250 File deleted.\r\n')
 			allow_delete = False
 		else:
-			self.client.send('450 Tidak diperbolehkan menghapus.\r\n')
+			self.client.send('450 Not allowed.\r\n')
 
 	def RMD(self,cmd):
 		dn=os.path.join(self.cwd,cmd[4:-1])
 		allow_delete = True
 		if allow_delete:
 			os.rmdir(dn)
-			self.client.send('250 Direktori sudah dihapus.\r\n')
+			self.client.send('250 Directory deleted.\r\n')
 			allow_delete = False
 		else:
-			self.client.send('450 Tidak diperbolehkan menghapus.\r\n')
+			self.client.send('450 Not allowed.\r\n')
 
 if __name__=='__main__':
 	ftp = ftpserver()

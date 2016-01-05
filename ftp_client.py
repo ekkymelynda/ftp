@@ -18,17 +18,17 @@ try:
 		msg = sys.stdin.readline()
 		if " " in msg:
 			nama_file = msg.split(' ',1)[1][:-1]
-			print nama_file
+			#print nama_file
 		if i==0:
 			if "USER" not in msg:
 				client.send("USER anonymous")
 				pesan = client.recv(1024)
-				#sys.stdout.write(pesan)
+				sys.stdout.write(pesan)
 				if "331" in pesan:
-					client.send("PASS ***")
+					client.send("PASS ****")
 					pesan = client.recv(1024)
 					sys.stdout.write(pesan)
-					print "Anda lupa memasukkan USER dan PASS terlebih dahulu"
+					print "Could't to connect server"
 			else:
 				client.send(msg)
 				pesan = client.recv(1024)
