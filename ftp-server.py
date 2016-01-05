@@ -105,7 +105,7 @@ class ftpserverfunc(threading.Thread):
 		self.client.send('257 \"%s\"\r\n' % cwd)
 
 	def CWD(self,cmd):
-		chwd=cmd[4:-2]
+		chwd=cmd[4:-1]
 		if chwd=='/':
 			self.cwd=self.basewd
 		elif chwd[0]=='/':
